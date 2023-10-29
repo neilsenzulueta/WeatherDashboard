@@ -7,7 +7,7 @@ var forecast = document.getElementById("forecast");
 
 searchForm.addEventListener("submit", function(e) {
     e.preventDefault();
-    var cityName = cityInput.ariaValueMax.trim();
+    var cityName = cityInput.value.trim();
 
     if (cityName) {
         getWeatherData(cityName);
@@ -58,3 +58,74 @@ function updateCurrentWeather(data) {
         currentWeather.innerHTML = "City not found or data unavailable.";
     }
 }
+function updateForecast(data) {
+    if (data && data.list) {
+        var forecastData = data.list;
+
+        forecast.innerHTML = '';
+
+        for (let i = 0; i < forecastData.length; i += 8) {
+            var forecastItem = forecastData[i];
+
+            var date = new Date(forecastItem.dt * 1000); 
+            var iconCode = forecastItem.weather[0].icon;
+            var temperature = forecastItem.main.temp;
+            var humidity = forecastItem.main.humidity;
+            var windSpeed = forecastItem.wind.speed;
+
+            var iconElement = document.createElement("img");
+            iconElement.setAttribute("src", `https://openweathermap.org/img/w/${iconCode}.png`);
+            iconElement.setAttribute("alt", forecastItem.weather[0].description);
+
+            var forecastItemElement = document.createElement("div");
+            forecastItemElement.classList.add("col-md-2", "forecast-item");
+            forecastItemElement.innerHTML = `
+                <h5>${date.toLocaleDateString()}</h5>
+                <img src="${iconElement.getAttribute("src")}" alt="${iconElement.getAttribute("alt")}">
+                <p>Temp: ${temperature}°C</p>
+                <p>Humidity: ${humidity}%</p>
+                <p>Wind: ${windSpeed} m/s</p>
+            `;
+
+            forecast.appendChild(forecastItemElement);
+        }
+    } else {
+        forecast.innerHTML = "Forecast data not available.";
+    }
+}
+function saveSearchHistory(cityName) {
+    var searchHistory = JSON.parse(localStorage.getItem("searchHistory")) || [];
+
+    if (!searchHistory.includes(cityName)) {
+        searchHistory.push(cityName);
+
+        var maxHistoryEntries = 10;
+        if (searchHistory.length > maxHistoryEntries) {
+            searchHistory.shift(); 
+        }
+
+        localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
+
+        displaySearchHistory();
+    }
+}
+function displaySearchHistory() {
+    var searchHistory = JSON.parse(localStorage.getItem("searchHistory")) || [];
+
+    var searchHistoryContainer = document.getElementById("search-history");
+
+    searchHistoryContainer.innerHTML = '';
+
+    searchHistory.forEach((city) => {
+        var historyItem = document.createElement("button");
+        historyItem.textContent = city;
+        historyItem.classList.add("btn", "btn-light", "w-100", "mb-2");
+        
+        historyItem.addEventListener("click", function () {
+            getWeatherData(city);
+        });
+        
+        searchHistoryContainer.appendChild(historyItem);
+    });
+}
+
