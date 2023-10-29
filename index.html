@@ -10,22 +10,32 @@
   </head>
 
   <body>
-    <header class="navbar bg-body-tertiary text-center pt-4 pb-4">
-      <h1>Weather Dashboard</h1>
-    </header>
-  <main class="container-fluid">
-    <section class="row">
-      <section class="col-lg-2 mt-2">
+    <nav class="navbar navbar-dark bg-dark">
+      <span class="navbar-brand mb-0 h1 w-100 text-center bigger-text">Weather Dashboard</span>
+    </nav>
+
+    <main class="container-fluid">
+      <section class="row">
+      
+        <section class="col-lg-2 mt-2">
         <div>
           <h3 class="text-black"><b> Search for a City:</b></h3>
+          <form id="search-form">
           <input type="text" class="pb-2 pl-2 pt-2 mb-2 w-100" placeholder="Sacramento" id="cityInput">
           <p id="err"></p>
           <button class="btn btn-primary w-100" type="button">Search</button>
-
-          
+          </form>
         </div>
-
-    
+        <section class="col-lg-2 mt-2 border-top mt-2 pt-2" id="history">
+        </section>
+      </section>
+        <div class="col-12 col-md-8 pt-4 mt-3">
+          <span id="cityName"></span>
+        <div class="row" id="5dayForecast">
+        </div>
+        </div>
+      </section>
+    </main>
 
 
 
