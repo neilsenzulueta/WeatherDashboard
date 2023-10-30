@@ -1,117 +1,105 @@
-var apiKey = ec7ce69200c64e3c1bd5d2c43074fa60;
+var apiKey = "ec7ce69200c64e3c1bd5d2c43074fa60";
+
 var searchForm = document.getElementById("search-form");
 var cityInput = document.getElementById("city-input");
-var currentWeather = document.getElementById("current-weather");
-var searchHistory = document.getElementById("search-history");
-var forecast = document.getElementById("forecast");
+var submitButton = document.getElementById("submit-btn");
 
-searchForm.addEventListener("submit", function(e) {
+submitButton.addEventListener("click", function (e) {
     e.preventDefault();
-    var cityName = cityInput.value.trim();
-
-    if (cityName) {
-        getWeatherData(cityName);
-        cityInput.value = "";
-    }
-});
-
-function getWeatherData(cityName) {
-    var apiKey = "ec7ce69200c64e3c1bd5d2c43074fa60";
-    
-    var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}`;
+    var cityName = cityInput.value;
+    var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=imperial&appid=${apiKey}`;
+    var forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&units=imperial&appid=${apiKey}`;
 
     fetch(apiUrl)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+        .then(function (response) {
+            if (response.ok) {
+                return response.json();
+            } else {
+              throw new Error("Network response was not ok: " + response.status);
             }
-            return response.json();
         })
-        .then((data) => {
-            updateCurrentWeather(data);
+        .then(function (data){
+            var temperature = data.main.temp;
+            var windSpeed = data.wind.speed;
+            var humidity = data.main.humidity;
+            document.getElementById("cityName").textContent = "City: " + data.name;
+            document.getElementById("temp").textContent = "Temperature: " + temperature + " F";
+            document.getElementById("wind").textContent = "Wind: " + windSpeed + " mph";
+            document.getElementById("humidity").textContent = "Humidity: " + humidity + " %";
         })
-        .catch((error) => {
-            console.error('There was a problem with the fetch operation:', error);
+        .catch(function (error) {
+            console.log("There was a problem with the fetch operation", error);
         });
-}
-function updateCurrentWeather(data) {
 
-    if (data && data.main && data.weather && data.weather[0]) {
-        var cityName = data.name;
-        var date = new Date(data.dt * 1000); 
-        var iconCode = data.weather[0].icon;
-        var temperature = data.main.temp;
-        var humidity = data.main.humidity;
-        var windSpeed = data.wind.speed;
+    fetch(forecastUrl) 
+        .then(function (response) {
+            if (response.ok) {
+                return response.json();
+            }   else {
+                throw new Error("Network response was not ok: " + response.status);
+            }
+        })
+        .then(function (data) {
+            var forecastList = data.list;
+            var forecastContainer = document.getElementById("forecast-container");
 
-        var iconElement = document.createElement("img");
-        iconElement.setAttribute("src", `https://openweathermap.org/img/w/${iconCode}.png`);
-        iconElement.setAttribute("alt", data.weather[0].description);
+            forecastContainer.innerHTML = '';
 
-        currentWeather.innerHTML = `
-            <h2>${cityName} (${date.toLocaleDateString()}) <img src="${iconElement.getAttribute("src")}" alt="${iconElement.getAttribute("alt")}"></h2>
-            <p>Temperature: ${temperature}°C</p>
-            <p>Humidity: ${humidity}%</p>
-            <p>Wind Speed: ${windSpeed} m/s</p>
-        `;
-    } else {
-        currentWeather.innerHTML = "City not found or data unavailable.";
-    }
-}
-function updateForecast(data) {
-    if (data && data.list) {
-        var forecastData = data.list;
+            for (var i = 0; i < forecastList.length; i += 8) {
+                var forecastData = forecastList[i];
+                var forecastDate = forecastData.dt_txt;
+                var forecastTemp = forecastData.main.temp;
+                var forecastWindSpeed = forecastData.wind.speed;
+                var forecastHumidity = forecastData.main.humidity;
+                    
+                var card = document.createElement("div");
+                card.classList.add("card");
+                var dateEl = document.createElement("p");
+                dateEl.textContent = "Date: " + forecastDate;
 
-        forecast.innerHTML = '';
+                var tempEl = document.createElement("p");
+                tempEl.textContent = "Temperature: " + forecastTemp + "°F";
 
-        for (let i = 0; i < forecastData.length; i += 8) {
-            var forecastItem = forecastData[i];
+                var windEl = document.createElement("p");
+                windEl.textContent = "Wind: " + forecastWindSpeed + " mph";
 
-            var date = new Date(forecastItem.dt * 1000); 
-            var iconCode = forecastItem.weather[0].icon;
-            var temperature = forecastItem.main.temp;
-            var humidity = forecastItem.main.humidity;
-            var windSpeed = forecastItem.wind.speed;
+                var humidityEl = document.createElement("p");
+                humidityEl.textContent = "Humidity: " + forecastHumidity + "%";
 
-            var iconElement = document.createElement("img");
-            iconElement.setAttribute("src", `https://openweathermap.org/img/w/${iconCode}.png`);
-            iconElement.setAttribute("alt", forecastItem.weather[0].description);
+                card.appendChild(dateEl);
+                card.appendChild(tempEl);
+                card.appendChild(windEl);
+                card.appendChild(humidityEl);
 
-            var forecastItemElement = document.createElement("div");
-            forecastItemElement.classList.add("col-md-2", "forecast-item");
-            forecastItemElement.innerHTML = `
-                <h5>${date.toLocaleDateString()}</h5>
-                <img src="${iconElement.getAttribute("src")}" alt="${iconElement.getAttribute("alt")}">
-                <p>Temp: ${temperature}°C</p>
-                <p>Humidity: ${humidity}%</p>
-                <p>Wind: ${windSpeed} m/s</p>
-            `;
+                forecastContainer.appendChild(card);
+            }
+        })
+        .catch(function (error) {
+            console.log("Error:", error);
+        });
 
-            forecast.appendChild(forecastItemElement);
-        }
-    } else {
-        forecast.innerHTML = "Forecast data not available.";
-    }
-}
+    saveSearchHistory(cityName);
+});
+
 function saveSearchHistory(cityName) {
-    var searchHistory = JSON.parse(localStorage.getItem("searchHistory")) || [];
+    var history = JSON.parse(localStorage.getItem("searchHistory")) || [];
 
-    if (!searchHistory.includes(cityName)) {
-        searchHistory.push(cityName);
+    if (!history.includes(cityName)) {
+        history.push(cityName);
 
         var maxHistoryEntries = 10;
-        if (searchHistory.length > maxHistoryEntries) {
-            searchHistory.shift(); 
+        if (history.length > maxHistoryEntries) {
+            history.shift(); 
         }
 
-        localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
+        localStorage.setItem("searchHistory", JSON.stringify(history));
 
-        displaySearchHistory();
+        //displaySearchHistory();
     }
 }
+
 function displaySearchHistory() {
     var searchHistory = JSON.parse(localStorage.getItem("searchHistory")) || [];
-
     var searchHistoryContainer = document.getElementById("search-history");
 
     searchHistoryContainer.innerHTML = '';
@@ -119,13 +107,12 @@ function displaySearchHistory() {
     searchHistory.forEach((city) => {
         var historyItem = document.createElement("button");
         historyItem.textContent = city;
-        historyItem.classList.add("btn", "btn-light", "w-100", "mb-2");
+        historyItem.classList.add("btn", "btn-success", ".d-md-block", "w-100", "mb-10");
         
         historyItem.addEventListener("click", function () {
-            getWeatherData(city);
+            historyItem(city);
         });
         
         searchHistoryContainer.appendChild(historyItem);
     });
 }
-
