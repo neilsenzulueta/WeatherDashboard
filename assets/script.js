@@ -1,15 +1,21 @@
+// API key for OpenWeatherMap.
 var apiKey = "ec7ce69200c64e3c1bd5d2c43074fa60";
 
+// References to HTML elements.
 var searchForm = document.getElementById("search-form");
 var cityInput = document.getElementById("city-input");
 var submitButton = document.getElementById("submit-btn");
 
+// Event listener to the submit button.
 submitButton.addEventListener("click", function (e) {
     e.preventDefault();
+
+    // API URLs for current weather and 5-day forecast.
     var cityName = cityInput.value;
     var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=imperial&appid=${apiKey}`;
     var forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&units=imperial&appid=${apiKey}`;
 
+    // Fetch and handle the current weather data.
     fetch(apiUrl)
         .then(function (response) {
             if (response.ok) {
@@ -34,6 +40,7 @@ submitButton.addEventListener("click", function (e) {
             console.log("There was a problem with the fetch operation", error);
         });
 
+    // Fetch and handle the 5-day forecast data.
     fetch(forecastUrl) 
         .then(function (response) {
             if (response.ok) {
@@ -54,7 +61,8 @@ submitButton.addEventListener("click", function (e) {
                 var forecastTemp = forecastData.main.temp;
                 var forecastWindSpeed = forecastData.wind.speed;
                 var forecastHumidity = forecastData.main.humidity;
-                    
+                
+                // Forecast cards and append them to the container.
                 var card = document.createElement("div");
                 card.classList.add("card");
                 var dateEl = document.createElement("p");
@@ -81,10 +89,11 @@ submitButton.addEventListener("click", function (e) {
         .catch(function (error) {
             console.log("Error:", error);
         });
-
+    // Searched history for the current city.
     saveSearchHistory(cityName);
 });
 
+// Function to save search history in local storage.
 function saveSearchHistory(cityName) {
     var history = JSON.parse(localStorage.getItem("searchHistory")) || [];
     var maxHistoryEntries = 5;
@@ -103,17 +112,20 @@ function saveSearchHistory(cityName) {
     }
 }
 
+// Function to display the search history.
 function displaySearchHistory() {
     var searchHistory = JSON.parse(localStorage.getItem("searchHistory")) || [];
     var searchHistoryContainer = document.getElementById("search-history");
 
     searchHistoryContainer.innerHTML = '';
 
+    // Create buttons for each search history entry.
     searchHistory.forEach((city) => {
         var historyItem = document.createElement("button");
         historyItem.textContent = city;
         historyItem.classList.add("btn", "btn-success", "d-md-block", "w-100", "mt-2", "mb-2");
         
+        // Event listener to load weather data for the selected city.
         historyItem.addEventListener("click", function () {
             getWeatherData(city);
         });
@@ -122,6 +134,7 @@ function displaySearchHistory() {
     });
 }
 
+// Function to get and display weather data for a specific city.
 function getWeatherData(cityName) {
     var apiKey = "ec7ce69200c64e3c1bd5d2c43074fa60";
     var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=imperial&appid=${apiKey}`;
