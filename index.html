@@ -16,21 +16,19 @@
 
     <main class="container-fluid">
       <section class="row">
-      
         <section class="col-lg-2 mt-2">
-        <div>
-          <h3 class="text-black"><b> Search for a City:</b></h3>
-          <form id="search-form">
-          <input type="text" class="pb-2 pl-2 pt-2 mb-2 w-100" placeholder="Sacramento" id="city-input">
-          <button class="btn btn-primary w-100" id="submit-btn" type="submit">Search</button>
-          </form>
-        </div>
-        <section class="col-lg-2 mt-2 border-top mt-2 pt-2" id="search-history">
-          <span><h3>5 day forecast</h3></span>
+          <div>
+            <h3 class="text-black"><b>Search for a City:</b></h3>
+            <form id="search-form">
+              <input type="text" class="pb-2 pl-2 pt-2 mb-2 w-100" placeholder="Sacramento" id="city-input">
+              <button class="btn btn-primary w-100" id="submit-btn" type="submit">Search</button>
+            </form>
+          </div>
+          <section class="col border-top mt-4 pt-2" id="search-history">
+          </section>
         </section>
-      </section>
         <div class="col-12 col-md-8 pt-4 mt-3" id="current-weather">
-          <span id="cityName"></span>
+          <h1 class="display-5" id="cityName"></h1>
           <p id="temp"></p>
           <p id="wind"></p>
           <p id="humidity"></p>

@@ -83,18 +83,19 @@ submitButton.addEventListener("click", function (e) {
 
 function saveSearchHistory(cityName) {
     var history = JSON.parse(localStorage.getItem("searchHistory")) || [];
-
+    var maxHistoryEntries = 5;
+    
     if (!history.includes(cityName)) {
         history.push(cityName);
 
-        var maxHistoryEntries = 10;
+        
         if (history.length > maxHistoryEntries) {
             history.shift(); 
         }
 
         localStorage.setItem("searchHistory", JSON.stringify(history));
 
-        //displaySearchHistory();
+        displaySearchHistory();
     }
 }
 
@@ -107,12 +108,39 @@ function displaySearchHistory() {
     searchHistory.forEach((city) => {
         var historyItem = document.createElement("button");
         historyItem.textContent = city;
-        historyItem.classList.add("btn", "btn-success", ".d-md-block", "w-100", "mb-10");
+        historyItem.classList.add("btn", "btn-success", "d-md-block", "w-100", "mt-2", "mb-2");
         
         historyItem.addEventListener("click", function () {
-            historyItem(city);
+            getWeatherData(city);
         });
         
         searchHistoryContainer.appendChild(historyItem);
     });
+}
+
+function getWeatherData(cityName) {
+    var apiKey = "ec7ce69200c64e3c1bd5d2c43074fa60";
+    var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=imperial&appid=${apiKey}`;
+
+    fetch(apiUrl)
+        .then(function (response) {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error("Network response was not ok: " + response.status);
+            }
+        })
+        .then(function (data) {
+            var temperature = data.main.temp;
+            var windSpeed = data.wind.speed;
+            var humidity = data.main.humidity;
+            document.getElementById("cityName").textContent = "City: " + data.name;
+            document.getElementById("temp").textContent = "Temperature: " + temperature + " F";
+            document.getElementById("wind").textContent = "Wind: " + windSpeed + " mph";
+            document.getElementById("humidity").textContent = "Humidity: " + humidity + " %";
+        })
+        .catch(function (error) {
+            console.log("There was a problem with the fetch operation", error);
+        });
+
 }
