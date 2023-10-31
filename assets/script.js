@@ -19,9 +19,12 @@ submitButton.addEventListener("click", function (e) {
             }
         })
         .then(function (data){
+            var iconCode = data.weather[0].icon;
+            var iconUrl = `https://openweathermap.org/img/wn/${iconCode}.png`;
             var temperature = data.main.temp;
             var windSpeed = data.wind.speed;
             var humidity = data.main.humidity;
+            document.getElementById("weather-icon").src = iconUrl;
             document.getElementById("cityName").textContent = "City: " + data.name;
             document.getElementById("temp").textContent = "Temperature: " + temperature + " F";
             document.getElementById("wind").textContent = "Wind: " + windSpeed + " mph";
@@ -65,6 +68,7 @@ submitButton.addEventListener("click", function (e) {
 
                 var humidityEl = document.createElement("p");
                 humidityEl.textContent = "Humidity: " + forecastHumidity + "%";
+
 
                 card.appendChild(dateEl);
                 card.appendChild(tempEl);
@@ -142,5 +146,5 @@ function getWeatherData(cityName) {
         .catch(function (error) {
             console.log("There was a problem with the fetch operation", error);
         });
-
+    
 }
